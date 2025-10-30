@@ -1,6 +1,10 @@
 import os
-# os.environ['ATTN_BACKEND'] = 'xformers'   # Can be 'flash-attn' or 'xformers', default is 'flash-attn'
-os.environ['SPCONV_ALGO'] = 'native'        # Can be 'native' or 'auto', default is 'auto'.
+
+# 设置 Hugging Face 镜像环境变量
+os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
+
+os.environ['ATTN_BACKEND'] = 'xformers'   # Can be 'flash-attn' or 'xformers', default is 'flash-attn'
+# os.environ['SPCONV_ALGO'] = 'native'        # Can be 'native' or 'auto', default is 'auto'.
                                             # 'auto' is faster but will do benchmarking at the beginning.
                                             # Recommended to set to 'native' if run only once.
 
@@ -8,10 +12,10 @@ import numpy as np
 import imageio
 from PIL import Image
 from trellis.pipelines import TrellisImageTo3DPipeline
-from trellis.utils import render_utils
+from trellis.utils import render_utils, postprocessing_utils
 
 # Load a pipeline from a model folder or a Hugging Face model hub.
-pipeline = TrellisImageTo3DPipeline.from_pretrained("microsoft/TRELLIS-image-large")
+pipeline = TrellisImageTo3DPipeline.from_pretrained("/data2/hja/CKPT/TRELLIS/TRELLIS-image-large")
 pipeline.cuda()
 
 # Load an image
@@ -40,7 +44,12 @@ outputs = pipeline.run_multi_image(
 # - outputs['radiance_field']: a list of radiance fields
 # - outputs['mesh']: a list of meshes
 
+"""
 video_gs = render_utils.render_video(outputs['gaussian'][0])['color']
 video_mesh = render_utils.render_video(outputs['mesh'][0])['normal']
 video = [np.concatenate([frame_gs, frame_mesh], axis=1) for frame_gs, frame_mesh in zip(video_gs, video_mesh)]
 imageio.mimsave("sample_multi.mp4", video, fps=30)
+"""
+
+# 保存高斯数据
+outputs['gaussian'][0].save_ply("sample_multi_gaussian.ply")
