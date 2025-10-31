@@ -1,3 +1,4 @@
+import argparse
 import torch, os
 torch.hub.set_dir(os.environ.get("TORCH_HUB_DIR", "/data2/hja/cache/torch/hub"))
 # 可选：国内镜像与加速设置
